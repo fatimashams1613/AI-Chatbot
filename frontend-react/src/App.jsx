@@ -9,7 +9,12 @@ function App() {
     if (!message.trim()) return;
 
     const userMessage = message;
-    setMessages((prev) => [...prev, { sender: "You", text: userMessage }]);
+
+    setMessages((prev) => [
+      ...prev,
+      { sender: "You", text: userMessage },
+    ]);
+
     setMessage("");
 
     try {
@@ -49,8 +54,11 @@ function App() {
   return (
     <div className="app">
       <div className="chat-container">
-        <h1>AI Assistant</h1>
-        <p className="subtitle">Your intelligent assistant</p>
+
+        <div className="chat-header">
+          <h1>Agentic Retrieval Agent</h1>
+          <p>Ask questions and get intelligent answers</p>
+        </div>
 
         <div className="chat-box">
           {messages.length === 0 && (
@@ -64,7 +72,9 @@ function App() {
             <div
               key={index}
               className={`message ${
-                msg.sender === "You" ? "user-message" : "ai-message"
+                msg.sender === "You"
+                  ? "user-message"
+                  : "ai-message"
               }`}
             >
               <strong>{msg.sender}:</strong> {msg.text}
@@ -81,8 +91,11 @@ function App() {
             onKeyDown={handleKeyDown}
           />
 
-          <button onClick={sendMessage}>Send</button>
+          <button onClick={sendMessage}>
+            Send
+          </button>
         </div>
+
       </div>
     </div>
   );
