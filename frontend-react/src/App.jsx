@@ -4,9 +4,10 @@ import "./App.css";
 function App() {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const sendMessage = async () => {
-    if (!message.trim()) return;
+    if (!message.trim() || loading) return;
 
     const userMessage = message.trim();
 
@@ -16,32 +17,47 @@ function App() {
     ]);
 
     setMessage("");
+    setLoading(true);
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: userMessage,
-        }),
-      });
+      const response = await fetch(
+        "https://ai-chatbot-omega-three-48.vercel.app/api/chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            message: userMessage,
+          }),
+        }
+      );
 
       const data = await response.json();
 
-      setMessages((prev) => [
-        ...prev,
-        { sender: "AI", text: data.response },
-      ]);
-    } catch (error) {
+      if (!response.ok) {
+        throw new Error(data.error || "Backend error");
+      }
+
       setMessages((prev) => [
         ...prev,
         {
           sender: "AI",
-          text: "Sorry, I couldn't connect to the backend.",
+          text: data.response || "No response received.",
         },
       ]);
+    } catch (error) {
+      console.error("Chat error:", error);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: "AI",
+          text: "Sorry, I couldn't connect to the AI backend.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -53,17 +69,20 @@ function App() {
 
   return (
     <div className="app">
-
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-icon">AI</div>
+
           <div>
             <h2>Agentic AI</h2>
             <span>Retrieval Agent</span>
           </div>
         </div>
 
-        <button className="new-chat" onClick={() => setMessages([])}>
+        <button
+          className="new-chat"
+          onClick={() => setMessages([])}
+        >
           + New Chat
         </button>
 
@@ -80,7 +99,6 @@ function App() {
       </aside>
 
       <main className="main">
-
         <header className="topbar">
           <div>
             <h1>Agentic Retrieval Agent</h1>
@@ -94,26 +112,39 @@ function App() {
         </header>
 
         <section className="chat-area">
-
           {messages.length === 0 ? (
             <div className="welcome">
               <div className="welcome-icon">✦</div>
+
               <h2>How can I help you?</h2>
+
               <p>
                 Ask a question and I'll use my AI capabilities
                 to provide an answer.
               </p>
 
               <div className="suggestions">
-                <button onClick={() => setMessage("What can you help me with?")}>
+                <button
+                  onClick={() =>
+                    setMessage("What can you help me with?")
+                  }
+                >
                   What can you help me with?
                 </button>
 
-                <button onClick={() => setMessage("Explain artificial intelligence")}>
+                <button
+                  onClick={() =>
+                    setMessage("Explain artificial intelligence")
+                  }
+                >
                   Explain AI
                 </button>
 
-                <button onClick={() => setMessage("Give me a summary")}>
+                <button
+                  onClick={() =>
+                    setMessage("Give me a summary")
+                  }
+                >
                   Give me a summary
                 </button>
               </div>
@@ -139,9 +170,19 @@ function App() {
                   </div>
                 </div>
               ))}
+
+              {loading && (
+                <div className="message ai-message">
+                  <div className="avatar">AI</div>
+
+                  <div className="message-content">
+                    <strong>AI</strong>
+                    <p>Thinking...</p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
-
         </section>
 
         <div className="input-wrapper">
@@ -150,12 +191,18 @@ function App() {
               type="text"
               placeholder="Message your AI assistant..."
               value={message}
-              onChange={(event) => setMessage(event.target.value)}
+              onChange={(event) =>
+                setMessage(event.target.value)
+              }
               onKeyDown={handleKeyDown}
+              disabled={loading}
             />
 
-            <button onClick={sendMessage}>
-              Send ↑
+            <button
+              onClick={sendMessage}
+              disabled={loading}
+            >
+              {loading ? "..." : "Send ↑"}
             </button>
           </div>
 
@@ -163,7 +210,6 @@ function App() {
             AI can make mistakes. Check important information.
           </p>
         </div>
-
       </main>
     </div>
   );
