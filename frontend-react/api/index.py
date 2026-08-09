@@ -7,8 +7,12 @@ from openai import OpenAI
 app = Flask(__name__)
 CORS(app)
 
+azure_endpoint = os.getenv("AZURE_ENDPOINT")
+azure_api_key = os.getenv("AZURE_API_KEY")
+
 client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
+    api_key=azure_api_key,
+    base_url=azure_endpoint.rstrip("/") + "/openai/v1/"
 )
 
 
