@@ -6,15 +6,23 @@ from openai import OpenAI
 app = Flask(__name__)
 CORS(app)
 
+
+# Azure OpenAI configuration
 AZURE_API_KEY = os.getenv("AZURE_API_KEY")
 AZURE_ENDPOINT = os.getenv("AZURE_ENDPOINT")
-AZURE_MODEL = os.getenv("AZURE_MODEL", "gpt-5")
+AZURE_MODEL = os.getenv("AZURE_MODEL")
 
+
+# Check environment variables
 if not AZURE_API_KEY:
     raise RuntimeError("AZURE_API_KEY is missing")
 
 if not AZURE_ENDPOINT:
     raise RuntimeError("AZURE_ENDPOINT is missing")
+
+if not AZURE_MODEL:
+    raise RuntimeError("AZURE_MODEL is missing")
+
 
 client = OpenAI(
     api_key=AZURE_API_KEY,
@@ -32,12 +40,16 @@ def home():
 @app.route("/chat", methods=["POST"])
 @app.route("/api/chat", methods=["POST"])
 def chat():
+
     try:
         data = request.get_json() or {}
+
         user_message = data.get("message", "").strip()
 
         if not user_message:
-            return jsonify({"error": "Message is required"}), 400
+            return jsonify({
+                "error": "Message is required"
+            }), 400
 
         response = client.responses.create(
             model=AZURE_MODEL,
@@ -49,8 +61,9 @@ def chat():
         })
 
     except Exception as e:
+
         print("CHAT ERROR:", str(e))
+
         return jsonify({
-            "error": "AI request failed",
-            "details": str(e)
+            "error": str(e)
         }), 500
