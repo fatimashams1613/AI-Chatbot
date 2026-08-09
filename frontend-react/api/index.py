@@ -35,12 +35,11 @@ def home():
     })
 
 
-@app.route("/chat", methods=["POST"])
 @app.route("/api/chat", methods=["POST"])
 def chat():
-
     try:
         data = request.get_json(silent=True) or {}
+
         user_message = data.get("message", "").strip()
 
         if not user_message:
