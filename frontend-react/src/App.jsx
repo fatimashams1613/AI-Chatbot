@@ -50,7 +50,7 @@ function App() {
         ...prev,
         {
           sender: "AI",
-          text: "Sorry, I couldn't connect to the AI backend.",
+          text: `Backend error: ${error.message}`,
         },
       ]);
     } finally {
@@ -66,7 +66,6 @@ function App() {
 
   return (
     <div className="app">
-
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-icon">AI</div>
@@ -100,7 +99,6 @@ function App() {
       </aside>
 
       <main className="main">
-
         <header className="topbar">
           <div>
             <h1>Agentic Retrieval Agent</h1>
@@ -114,9 +112,7 @@ function App() {
         </header>
 
         <section className="chat-area">
-
           {messages.length === 0 ? (
-
             <div className="welcome">
               <div className="welcome-icon">✦</div>
 
@@ -128,7 +124,6 @@ function App() {
               </p>
 
               <div className="suggestions">
-
                 <button
                   onClick={() =>
                     setMessage("What can you help me with?")
@@ -152,14 +147,10 @@ function App() {
                 >
                   Give me a summary
                 </button>
-
               </div>
             </div>
-
           ) : (
-
             <div className="messages">
-
               {messages.map((msg, index) => (
                 <div
                   key={index}
@@ -169,7 +160,6 @@ function App() {
                       : "ai-message"
                   }`}
                 >
-
                   <div className="avatar">
                     {msg.sender === "You" ? "You" : "AI"}
                   </div>
@@ -178,32 +168,25 @@ function App() {
                     <strong>{msg.sender}</strong>
                     <p>{msg.text}</p>
                   </div>
-
                 </div>
               ))}
 
               {loading && (
                 <div className="message ai-message">
-
                   <div className="avatar">AI</div>
 
                   <div className="message-content">
                     <strong>AI</strong>
                     <p>Thinking...</p>
                   </div>
-
                 </div>
               )}
-
             </div>
           )}
-
         </section>
 
         <div className="input-wrapper">
-
           <div className="input-area">
-
             <input
               type="text"
               placeholder="Message your AI assistant..."
@@ -219,15 +202,12 @@ function App() {
             >
               {loading ? "..." : "Send ↑"}
             </button>
-
           </div>
 
           <p className="footer-text">
             AI can make mistakes. Check important information.
           </p>
-
         </div>
-
       </main>
     </div>
   );
