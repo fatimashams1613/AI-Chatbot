@@ -1,4 +1,5 @@
 import os
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from openai import OpenAI
@@ -6,18 +7,28 @@ from openai import OpenAI
 app = Flask(__name__)
 CORS(app)
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY")
+)
 
 
-@app.route("/")
+@app.route("/api", methods=["GET"])
 def home():
     return "Chatbot Backend is Running!"
 
 
-@app.route("/chat", methods=["POST"])
+@app.route("/api/", methods=["GET"])
+def home_slash():
+    return "Chatbot Backend is Running!"
+
+
+@app.route("/api/chat", methods=["POST"])
 def chat():
-    data = request.get_json()
+    data = request.get_json() or {}
     user_message = data.get("message", "")
+
+    if not user_message:
+        return jsonify({"error": "Message is required"}), 400
 
     response = client.responses.create(
         model="gpt-5",
@@ -27,7 +38,3 @@ def chat():
     return jsonify({
         "response": response.output_text
     })
-
-
-if __name__ == "__main__":
-    app.run()
