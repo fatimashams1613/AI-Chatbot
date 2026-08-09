@@ -33,7 +33,7 @@ function App() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Backend error");
+        throw new Error(data.error || "API request failed");
       }
 
       setMessages((prev) => [
@@ -64,14 +64,9 @@ function App() {
     }
   };
 
-  const startSuggestion = (text) => {
-    setMessage(text);
-  };
-
   return (
     <div className="app">
 
-      {/* SIDEBAR */}
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-icon">AI</div>
@@ -84,7 +79,10 @@ function App() {
 
         <button
           className="new-chat"
-          onClick={() => setMessages([])}
+          onClick={() => {
+            setMessages([]);
+            setMessage("");
+          }}
         >
           + New Chat
         </button>
@@ -101,16 +99,12 @@ function App() {
         </div>
       </aside>
 
-      {/* MAIN */}
       <main className="main">
 
-        {/* TOP BAR */}
         <header className="topbar">
           <div>
             <h1>Agentic Retrieval Agent</h1>
-            <p>
-              Ask questions and get intelligent answers
-            </p>
+            <p>Ask questions and get intelligent answers</p>
           </div>
 
           <div className="status">
@@ -119,33 +113,25 @@ function App() {
           </div>
         </header>
 
-        {/* CHAT AREA */}
         <section className="chat-area">
 
           {messages.length === 0 ? (
 
             <div className="welcome">
+              <div className="welcome-icon">✦</div>
 
-              <div className="welcome-icon">
-                ✦
-              </div>
-
-              <h2>
-                How can I help you?
-              </h2>
+              <h2>How can I help you?</h2>
 
               <p>
-                Ask a question and I'll use my AI
-                capabilities to provide an answer.
+                Ask a question and I'll use my AI capabilities
+                to provide an answer.
               </p>
 
               <div className="suggestions">
 
                 <button
                   onClick={() =>
-                    startSuggestion(
-                      "What can you help me with?"
-                    )
+                    setMessage("What can you help me with?")
                   }
                 >
                   What can you help me with?
@@ -153,9 +139,7 @@ function App() {
 
                 <button
                   onClick={() =>
-                    startSuggestion(
-                      "Explain artificial intelligence"
-                    )
+                    setMessage("Explain artificial intelligence")
                   }
                 >
                   Explain AI
@@ -163,16 +147,13 @@ function App() {
 
                 <button
                   onClick={() =>
-                    startSuggestion(
-                      "Give me a summary"
-                    )
+                    setMessage("Give me a summary")
                   }
                 >
                   Give me a summary
                 </button>
 
               </div>
-
             </div>
 
           ) : (
@@ -180,7 +161,6 @@ function App() {
             <div className="messages">
 
               {messages.map((msg, index) => (
-
                 <div
                   key={index}
                   className={`message ${
@@ -191,54 +171,35 @@ function App() {
                 >
 
                   <div className="avatar">
-                    {msg.sender === "You"
-                      ? "You"
-                      : "AI"}
+                    {msg.sender === "You" ? "You" : "AI"}
                   </div>
 
                   <div className="message-content">
-
-                    <strong>
-                      {msg.sender}
-                    </strong>
-
-                    <p>
-                      {msg.text}
-                    </p>
-
+                    <strong>{msg.sender}</strong>
+                    <p>{msg.text}</p>
                   </div>
 
                 </div>
-
               ))}
 
               {loading && (
                 <div className="message ai-message">
 
-                  <div className="avatar">
-                    AI
-                  </div>
+                  <div className="avatar">AI</div>
 
                   <div className="message-content">
-
                     <strong>AI</strong>
-
-                    <p>
-                      Thinking...
-                    </p>
-
+                    <p>Thinking...</p>
                   </div>
 
                 </div>
               )}
 
             </div>
-
           )}
 
         </section>
 
-        {/* INPUT */}
         <div className="input-wrapper">
 
           <div className="input-area">
@@ -247,16 +208,14 @@ function App() {
               type="text"
               placeholder="Message your AI assistant..."
               value={message}
-              onChange={(event) =>
-                setMessage(event.target.value)
-              }
+              onChange={(event) => setMessage(event.target.value)}
               onKeyDown={handleKeyDown}
               disabled={loading}
             />
 
             <button
               onClick={sendMessage}
-              disabled={loading}
+              disabled={loading || !message.trim()}
             >
               {loading ? "..." : "Send ↑"}
             </button>
@@ -270,7 +229,6 @@ function App() {
         </div>
 
       </main>
-
     </div>
   );
 }
