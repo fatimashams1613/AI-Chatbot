@@ -30,10 +30,25 @@ function App() {
         }),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get("content-type") || "";
+      const responseText = await response.text();
+
+      console.log("STATUS:", response.status);
+      console.log("CONTENT TYPE:", contentType);
+      console.log("RESPONSE:", responseText);
+
+      if (!contentType.includes("application/json")) {
+        throw new Error(
+          `Server returned ${response.status} ${response.statusText}, not JSON. Response starts with: ${responseText.slice(0, 100)}`
+        );
+      }
+
+      const data = JSON.parse(responseText);
 
       if (!response.ok) {
-        throw new Error(data.error || "API request failed");
+        throw new Error(
+          data.details || data.error || `API error ${response.status}`
+        );
       }
 
       setMessages((prev) => [
@@ -44,7 +59,7 @@ function App() {
         },
       ]);
     } catch (error) {
-      console.error("Chat error:", error);
+      console.error("CHAT ERROR:", error);
 
       setMessages((prev) => [
         ...prev,
@@ -69,7 +84,6 @@ function App() {
       <aside className="sidebar">
         <div className="brand">
           <div className="brand-icon">AI</div>
-
           <div>
             <h2>Agentic AI</h2>
             <span>Retrieval Agent</span>
@@ -115,7 +129,6 @@ function App() {
           {messages.length === 0 ? (
             <div className="welcome">
               <div className="welcome-icon">✦</div>
-
               <h2>How can I help you?</h2>
 
               <p>
@@ -174,7 +187,6 @@ function App() {
               {loading && (
                 <div className="message ai-message">
                   <div className="avatar">AI</div>
-
                   <div className="message-content">
                     <strong>AI</strong>
                     <p>Thinking...</p>
