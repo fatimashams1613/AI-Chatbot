@@ -6,9 +6,19 @@ from openai import OpenAI
 app = Flask(__name__)
 CORS(app)
 
+AZURE_API_KEY = os.getenv("AZURE_API_KEY")
+AZURE_ENDPOINT = os.getenv("AZURE_ENDPOINT")
+AZURE_MODEL = os.getenv("AZURE_MODEL", "gpt-5")
+
+if not AZURE_API_KEY:
+    raise RuntimeError("AZURE_API_KEY is missing")
+
+if not AZURE_ENDPOINT:
+    raise RuntimeError("AZURE_ENDPOINT is missing")
+
 client = OpenAI(
-    api_key=os.getenv("AZURE_API_KEY"),
-    base_url=os.getenv("AZURE_ENDPOINT").rstrip("/") + "/openai/v1/"
+    api_key=AZURE_API_KEY,
+    base_url=AZURE_ENDPOINT.rstrip("/") + "/openai/v1/"
 )
 
 
@@ -22,17 +32,25 @@ def home():
 @app.route("/chat", methods=["POST"])
 @app.route("/api/chat", methods=["POST"])
 def chat():
-    data = request.get_json() or {}
-    user_message = data.get("message", "")
+    try:
+        data = request.get_json() or {}
+        user_message = data.get("message", "").strip()
 
-    if not user_message:
-        return jsonify({"error": "Message is required"}), 400
+        if not user_message:
+            return jsonify({"error": "Message is required"}), 400
 
-    response = client.responses.create(
-        model="gpt-5",
-        input=user_message
-    )
+        response = client.responses.create(
+            model=AZURE_MODEL,
+            input=user_message
+        )
 
-    return jsonify({
-        "response": response.output_text
-    })
+        return jsonify({
+            "response": response.output_text
+        })
+
+    except Exception as e:
+        print("CHAT ERROR:", str(e))
+        return jsonify({
+            "error": "AI request failed",
+            "details": str(e)
+        }), 500

@@ -13,37 +13,37 @@ function App() {
 
     setMessages((prev) => [
       ...prev,
-      { sender: "You", text: userMessage },
+      {
+        sender: "You",
+        text: userMessage,
+      },
     ]);
 
     setMessage("");
     setLoading(true);
 
     try {
-      const response = await fetch(
-        "https://ai-chatbot-omega-three-48.vercel.app/api/chat",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            message: userMessage,
-          }),
-        }
-      );
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userMessage,
+        }),
+      });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Backend error");
+        throw new Error(data.error || "Backend request failed");
       }
 
       setMessages((prev) => [
         ...prev,
         {
           sender: "AI",
-          text: data.response || "No response received.",
+          text: data.response || "I didn't receive a response.",
         },
       ]);
     } catch (error) {
@@ -67,6 +67,10 @@ function App() {
     }
   };
 
+  const useSuggestion = (text) => {
+    setMessage(text);
+  };
+
   return (
     <div className="app">
       <aside className="sidebar">
@@ -81,13 +85,17 @@ function App() {
 
         <button
           className="new-chat"
-          onClick={() => setMessages([])}
+          onClick={() => {
+            setMessages([]);
+            setMessage("");
+          }}
         >
           + New Chat
         </button>
 
         <div className="sidebar-section">
           <p>ABOUT</p>
+
           <span>Intelligent AI assistant</span>
           <span>Retrieval powered</span>
           <span>Azure connected</span>
@@ -126,7 +134,7 @@ function App() {
               <div className="suggestions">
                 <button
                   onClick={() =>
-                    setMessage("What can you help me with?")
+                    useSuggestion("What can you help me with?")
                   }
                 >
                   What can you help me with?
@@ -134,7 +142,7 @@ function App() {
 
                 <button
                   onClick={() =>
-                    setMessage("Explain artificial intelligence")
+                    useSuggestion("Explain artificial intelligence")
                   }
                 >
                   Explain AI
@@ -142,7 +150,7 @@ function App() {
 
                 <button
                   onClick={() =>
-                    setMessage("Give me a summary")
+                    useSuggestion("Give me a summary")
                   }
                 >
                   Give me a summary
@@ -166,6 +174,7 @@ function App() {
 
                   <div className="message-content">
                     <strong>{msg.sender}</strong>
+
                     <p>{msg.text}</p>
                   </div>
                 </div>
@@ -200,7 +209,7 @@ function App() {
 
             <button
               onClick={sendMessage}
-              disabled={loading}
+              disabled={loading || !message.trim()}
             >
               {loading ? "..." : "Send ↑"}
             </button>
